@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel de Parada</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@500;700;900&family=Red+Hat+Text:wght@400;500;700&family=Red+Hat+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: faixa de KPIs + quadro de 6 colunas (seg–sáb), cada coluna = um dia de parada, cartões por frota */
+:root{
+  --bg:#EEF1F5; --panel:#FFFFFF; --ink:#16202E; --muted:#5E6B7D; --line:#D6DCE5;
+  --cle:#E8A900; --cle-soft:#FFF4D1; --qz:#1F4E9A; --qz-soft:#E3ECFA;
+  --ok:#1E8A4C; --ok-soft:#DDF3E6; --nok:#C2362B; --nok-soft:#FBE3E0; --late:#C46A00; --late-soft:#FDEBD6;
+  --today:#16202E;
+  --f-display:'Nexa','Red Hat Display',system-ui,sans-serif;
+  --f-body:'Nexa','Red Hat Text',system-ui,sans-serif;
+  --f-mono:'Red Hat Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151E; --panel:#18212D; --ink:#E8EDF4; --muted:#93A0B3; --line:#2A3646;
+  --cle:#F5BE2A; --cle-soft:#3A3013; --qz:#6E9BE6; --qz-soft:#1A2A45;
+  --ok:#47C27A; --ok-soft:#173527; --nok:#EF6B60; --nok-soft:#3D1D1A; --late:#F0A04B; --late-soft:#3B2914; --today:#E8EDF4; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151E; --panel:#18212D; --ink:#E8EDF4; --muted:#93A0B3; --line:#2A3646;
+  --cle:#F5BE2A; --cle-soft:#3A3013; --qz:#6E9BE6; --qz-soft:#1A2A45;
+  --ok:#47C27A; --ok-soft:#173527; --nok:#EF6B60; --nok-soft:#3D1D1A; --late:#F0A04B; --late-soft:#3B2914; --today:#E8EDF4; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.4}
+.wrap{padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1900px;margin:0 auto;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-weight:900;font-size:clamp(22px,3vw,34px);margin:4px 0 0;letter-spacing:-.01em;text-wrap:balance}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;background:var(--panel);padding:3px}
+.seg button{font:600 13px var(--f-body);border:0;background:transparent;color:var(--muted);padding:7px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.seg button:focus-visible,.st:focus-visible{outline:2px solid var(--qz);outline-offset:2px}
+.btn{font:700 13px var(--f-body);border:1px solid var(--ink);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:999px;cursor:pointer}
+.btn:focus-visible{outline:2px solid var(--qz);outline-offset:2px}
+.btn[disabled]{opacity:.6;cursor:progress}
+.msg{font-size:12px;color:var(--muted)}
+.sync{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--ok)}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:grid;gap:6px}
+.kpi .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.kpi .v{font:900 30px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.kpi .s{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.bar .b-ok{background:var(--ok)} .bar .b-nok{background:var(--nok)}
+.unitk{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.unitk div{display:grid;gap:2px}
+.tag{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12px}
+.sw{width:10px;height:10px;border-radius:2px}
+.sw.cle{background:var(--cle)} .sw.qz{background:var(--qz)}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12px;color:var(--muted);align-items:center}
+.board-scroll{overflow-x:auto;padding-bottom:6px}
+.board{display:grid;grid-template-columns:repeat(6,minmax(250px,1fr));gap:12px;min-width:1560px}
+@media (max-width:820px){.board{grid-template-columns:1fr;min-width:0}.board-scroll{overflow:visible}}
+.day{background:var(--panel);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-width:0}
+.day.is-today{border:2px solid var(--today)}
+.dh{padding:12px 14px 10px;border-bottom:1px solid var(--line);display:grid;gap:8px}
+.dh-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.dh .wd{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.dh .dt{font:900 24px/1 var(--f-display);font-variant-numeric:tabular-nums}
+.dh .today{font:700 10px var(--f-mono);letter-spacing:.1em;background:var(--today);color:var(--bg);padding:3px 7px;border-radius:4px;text-transform:uppercase}
+.dh .nums{display:flex;gap:12px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dh .nums b{color:var(--ink);font-size:14px}
+.cards{padding:10px;display:grid;gap:10px;align-content:start}
+.empty{padding:20px 10px;color:var(--muted);font-size:13px;text-align:center}
+.card{border:1px solid var(--line);border-left:5px solid var(--cle);border-radius:8px;background:var(--panel);min-width:0}
+.card.qz{border-left-color:var(--qz)}
+.ch{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--cle-soft);border-radius:0 7px 0 0}
+.card.qz .ch{background:var(--qz-soft)}
+.ch .fr{font:900 18px/1.1 var(--f-display);font-variant-numeric:tabular-nums}
+.ch .fe{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.ch .hh{font:700 12px var(--f-mono);white-space:nowrap;text-align:right}
+.ch .hh small{display:block;color:var(--muted);font-weight:500}
+.os{list-style:none;margin:0;padding:0}
+.os li{display:grid;grid-template-columns:1fr auto;gap:6px 8px;padding:7px 10px;border-top:1px solid var(--line);align-items:start}
+.os li:first-child{border-top:0}
+.os .d{font-size:12.5px;line-height:1.3;min-width:0;overflow-wrap:anywhere}
+.os .m{font:500 11px var(--f-mono);color:var(--muted);margin-top:2px;display:flex;gap:8px;flex-wrap:wrap}
+.pr{font-weight:700;padding:0 4px;border-radius:3px;border:1px solid var(--line)}
+.os li.ex .d{text-decoration:line-through;text-decoration-color:var(--ok);color:var(--muted)}
+.st{font:700 11px var(--f-body);border-radius:999px;padding:4px 9px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer;white-space:nowrap}
+.st.ex{background:var(--ok-soft);color:var(--ok);border-color:var(--ok)}
+.st.nx{background:var(--nok-soft);color:var(--nok);border-color:var(--nok)}
+.st.late{background:var(--late-soft);color:var(--late);border-color:var(--late)}
+.st[disabled]{cursor:default}
+.foot{font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
+.nome{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.nome input{font:500 13px var(--f-body);border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:7px 12px;width:200px;max-width:100%}
+.nome input:focus-visible{outline:2px solid var(--qz);outline-offset:1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">Clealco · Manutenção Automotiva · Preventiva condicional</div>
+      <h1 id="titulo">Cronograma de Parada</h1>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Unidade">
+        <button id="u-all" data-u="all" aria-pressed="true">Ambas</button>
+        <button id="u-cle" data-u="cle" aria-pressed="false">Clementina</button>
+        <button id="u-qz" data-u="qz" aria-pressed="false">Queiroz</button>
+      </div>
+      <label class="nome"><span>Seu nome</span><input id="nome" maxlength="40" placeholder="Para registrar quem marcou" autocomplete="name"></label>
+      <button class="btn" id="pdf-btn">Exportar PDF</button>
+      <span class="sync"><span class="dot" id="dot"></span><span id="synctxt">Conectando…</span></span>
+    </div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <div class="legend">
+    <span class="tag"><span class="sw cle"></span>Clementina · Dener</span>
+    <span class="tag"><span class="sw qz"></span>Queiroz · Marcio</span>
+    <span>Toque no status da OS para alternar: Pendente → Executada → Não executada.</span>
+    <span>Prioridade: A alta · M média · B baixa</span>
+  </div>
+
+  <div class="board-scroll"><div class="board" id="board"></div></div>
+
+  <p class="foot">Fonte: Programação Preventiva Condicional Clementina e Queiroz. Status gravado na planilha de acompanhamento. OS pendente em dia já passado aparece como Atrasada. Passe o mouse no status para ver quem marcou.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="config.js"></script>
+<script src="dados.js"></script>
+<script>
+const RESP = {cle:"DENER", qz:"MARCIO"};
+const OS = [];
+for (const u of ["cle","qz"]) for (const l of RAW[u].split("\n")) {
+  const [d,fe,b,fr,p,ds,hh] = l.split("|");
+  OS.push({u,d,fe,b,fr,p,ds,hh:+hh});
+}
+const WD = ["Dom","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const status = {};           // boletim -> "ex" | "nx"
+const meta = {};             // boletim -> {by, at}
+const pending = new Set();
+let unit = "all", canWrite = true;
+document.getElementById("titulo").textContent = "Cronograma de Parada · " + SEMANA;
+document.title = "Painel de Parada · " + SEMANA;
+try { unit = localStorage.getItem("unit") || "all"; } catch(e) {}
+
+function todayKey(){ const t=new Date(); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); }
+function stOf(o){ const s=status[o.b]; if (s) return s; return o.d < todayKey() ? "late" : "pd"; }
+const LABEL = {pd:"Pendente", ex:"Executada", nx:"Não executada", late:"Atrasada"};
+const fmt = n => n.toLocaleString("pt-BR");
+const pct = (a,b) => b ? Math.round(a/b*100) : 0;
+
+function summary(list){
+  const hh = list.reduce((s,o)=>s+o.hh,0);
+  const ex = list.filter(o=>status[o.b]==="ex"), nx = list.filter(o=>status[o.b]==="nx");
+  const exhh = ex.reduce((s,o)=>s+o.hh,0), nxhh = nx.reduce((s,o)=>s+o.hh,0);
+  const late = list.filter(o=>stOf(o)==="late").length;
+  return {n:list.length, hh, ex:ex.length, nx:nx.length, exhh, nxhh, late, frotas:new Set(list.map(o=>o.fr)).size};
+}
+function bar(s){ return `<div class="bar" aria-hidden="true"><i class="b-ok" style="width:${pct(s.exhh,s.hh)}%"></i><i class="b-nok" style="width:${pct(s.nxhh,s.hh)}%"></i></div>`; }
+
+function render(){
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.u===unit));
+  const list = OS.filter(o=>unit==="all"||o.u===unit);
+  const S = summary(list), C = summary(OS.filter(o=>o.u==="cle")), Q = summary(OS.filter(o=>o.u==="qz"));
+  document.getElementById("kpis").innerHTML = `
+    <div class="kpi"><span class="l">OS programadas</span><span class="v">${S.n}</span><span class="s">${S.frotas} frotas em parada</span></div>
+    <div class="kpi"><span class="l">H.H programadas</span><span class="v">${fmt(S.hh)}</span><span class="s">${fmt(S.exhh)} H.H executadas</span></div>
+    <div class="kpi"><span class="l">Aderência (H.H)</span><span class="v">${pct(S.exhh,S.hh)}%</span>${bar(S)}<span class="s">${S.ex} executadas · ${S.nx} não executadas</span></div>
+    <div class="kpi"><span class="l">Atrasadas</span><span class="v" style="color:${S.late?'var(--late)':'inherit'}">${S.late}</span><span class="s">pendentes de dias já passados</span></div>
+    <div class="kpi"><span class="l">Por unidade</span><div class="unitk">
+      <div><span class="tag"><span class="sw cle"></span>Clementina</span><span class="s">${C.n} OS · ${C.hh} H.H · ${pct(C.exhh,C.hh)}%</span>${bar(C)}</div>
+      <div><span class="tag"><span class="sw qz"></span>Queiroz</span><span class="s">${Q.n} OS · ${Q.hh} H.H · ${pct(Q.exhh,Q.hh)}%</span>${bar(Q)}</div>
+    </div></div>`;
+
+  const tk = todayKey();
+  document.getElementById("board").innerHTML = DAYS.map(d=>{
+    const dl = list.filter(o=>o.d===d), s = summary(dl);
+    const dt = new Date(d+"T12:00:00");
+    const groups = [];
+    for (const o of dl){ let g = groups.find(g=>g.fr===o.fr&&g.u===o.u); if(!g){g={fr:o.fr,u:o.u,fe:o.fe,items:[]};groups.push(g);} g.items.push(o); }
+    groups.sort((a,b)=>a.u.localeCompare(b.u)||b.items.reduce((x,o)=>x+o.hh,0)-a.items.reduce((x,o)=>x+o.hh,0));
+    const cards = groups.map(g=>{
+      const gh = g.items.reduce((x,o)=>x+o.hh,0), gd = g.items.filter(o=>status[o.b]==="ex").length;
+      return `<article class="card ${g.u}">
+        <div class="ch"><div><div class="fr">Frota ${g.fr}</div><div class="fe">${g.fe}</div></div>
+        <div class="hh">${gh} H.H<small>${gd}/${g.items.length} OS</small></div></div>
+        <ul class="os">${g.items.map(o=>{ const st=stOf(o); return `<li class="${st}">
+          <div><div class="d">${o.ds}</div><div class="m"><span>OS ${o.b}</span><span class="pr">${o.p}</span><span>${o.hh} h</span><span>${RESP[o.u]}</span></div></div>
+          <button class="st ${st}" id="st-${o.b}" data-b="${o.b}" ${canWrite?"":"disabled"} title="${meta[o.b]&&meta[o.b].by?(LABEL[st]+' por '+meta[o.b].by+(meta[o.b].at?' em '+meta[o.b].at:'')):''}" aria-label="Status da OS ${o.b}: ${LABEL[st]}">${LABEL[st]}</button></li>`;}).join("")}</ul>
+      </article>`;}).join("");
+    return `<section class="day ${d===tk?'is-today':''}">
+      <div class="dh"><div class="dh-top"><div><div class="wd">${WD[dt.getDay()]}</div><div class="dt">${d.slice(8)}/${d.slice(5,7)}</div></div>${d===tk?'<span class="today">Hoje</span>':''}</div>
+      <div class="nums"><span><b>${s.n}</b> OS</span><span><b>${s.hh}</b> H.H</span><span><b>${s.frotas}</b> frotas</span><span><b>${pct(s.exhh,s.hh)}%</b> exec.</span></div>${bar(s)}</div>
+      <div class="cards">${cards || '<div class="empty">Sem parada programada</div>'}</div></section>`;
+  }).join("");
+}
+
+document.querySelector(".seg").addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  unit = b.dataset.u; try{ localStorage.setItem("unit",unit);}catch(e){} render();
+});
+document.getElementById("board").addEventListener("click", async e=>{
+  const b = e.target.closest(".st"); if(!b || !canWrite) return;
+  const id = b.dataset.b, cur = status[id] || "pd";
+  const next = cur==="pd" ? "ex" : cur==="ex" ? "nx" : "pd";
+  const prev = status[id];
+  if (next==="pd") delete status[id]; else status[id]=next;
+  render();
+  if (!API_URL) return;
+  const o = OS.find(x=>x.b===id), by = (document.getElementById("nome").value||"").trim();
+  pending.add(id);
+  try {
+    const r = await fetch(API_URL, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({b:id, s:next, by, u:o.u==="cle"?"Clementina":"Queiroz", d:o.d, fr:o.fr, fe:o.fe, ds:o.ds, hh:o.hh})});
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error||"falha");
+    setSync(true,"Ao vivo · salvo");
+  } catch(err) {
+    if (prev) status[id]=prev; else delete status[id];
+    setSync(false,"Não salvou: verifique a internet e tente de novo");
+    render();
+  } finally { pending.delete(id); }
+});
+function setSync(on,t){ document.getElementById("dot").classList.toggle("on",on); document.getElementById("synctxt").textContent=t; }
+
+/* ---------- Exportar PDF (A3 paisagem, uma folha por unidade) ---------- */
+const PU = {cle:{name:"CLEMENTINA",col:[242,182,0],soft:[255,244,209],fg:[0,0,0]},
+            qz:{name:"QUEIROZ",col:[31,78,154],soft:[227,236,250],fg:[255,255,255]}};
+const WDP = ["SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"];
+function buildPDF(units){
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:"landscape",unit:"mm",format:"a3"});
+  const W=420,H=297,M=12,G=4,INK=[22,32,46],MUT=[94,107,125],LN=[201,208,218];
+  const gerado = new Date().toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});
+  units.forEach((u,pi)=>{
+    if (pi) doc.addPage();
+    const P=PU[u], rows=OS.filter(o=>o.u===u), s=summary(rows);
+    doc.setFillColor(...P.col); doc.rect(0,0,W,30,"F");
+    doc.setTextColor(...P.fg); doc.setFont("helvetica","bold"); doc.setFontSize(22);
+    doc.text("CRONOGRAMA DE PARADA · PREVENTIVA CONDICIONAL · "+P.name, M, 15);
+    doc.setFont("helvetica","normal"); doc.setFontSize(11);
+    doc.text(`Semana ${SEMANA}  ·  Responsável: ${RESP[u]}  ·  ${s.n} OS  ·  ${s.hh} H.H  ·  ${s.frotas} frotas  ·  Executadas: ${s.ex} OS / ${s.exhh} H.H (${pct(s.exhh,s.hh)}%)`, M, 23);
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.text("CLEALCO · MANUTENÇÃO AUTOMOTIVA", W-M, 15, {align:"right"});
+    doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.text("E = executada   NE = não executada   (marcado = status no painel em "+gerado+")", W-M, 23, {align:"right"});
+    const top=34, bottom=H-31, cw=(W-2*M-5*G)/6;
+    DAYS.forEach((d,i)=>{
+      const x=M+i*(cw+G), dl=rows.filter(o=>o.d===d), ds=summary(dl);
+      doc.setDrawColor(...LN); doc.setLineWidth(.3); doc.roundedRect(x,top,cw,bottom-top,2,2,"S");
+      doc.setFillColor(...INK); doc.roundedRect(x,top,cw,14,2,2,"F"); doc.rect(x,top+10,cw,4,"F");
+      doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`${d.slice(8)}/${d.slice(5,7)}`, x+3, top+8);
+      doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.text(WDP[i], x+3, top+12);
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.text(`${ds.n} OS · ${ds.hh} H.H`, x+cw-3, top+7.5, {align:"right"});
+      doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.text(`Exec.: ${ds.ex} / ${ds.n}`, x+cw-3, top+12, {align:"right"});
+      let y=top+17;
+      if (!dl.length){ doc.setTextColor(...MUT); doc.setFontSize(9); doc.text("Sem parada programada", x+cw/2, y+8, {align:"center"}); }
+      const groups=[];
+      for (const o of dl){ let g=groups.find(g=>g.fr===o.fr); if(!g){g={fr:o.fr,fe:o.fe,it:[]};groups.push(g);} g.it.push(o); }
+      groups.sort((a,b)=>b.it.reduce((s,o)=>s+o.hh,0)-a.it.reduce((s,o)=>s+o.hh,0));
+      for (const g of groups){
+        const gh=g.it.reduce((s,o)=>s+o.hh,0);
+        doc.setFillColor(...P.soft); doc.rect(x+1.5,y,cw-3,8.5,"F");
+        doc.setFillColor(...P.col); doc.rect(x+1.5,y,1.6,8.5,"F");
+        doc.setTextColor(...INK); doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.text("FROTA "+g.fr, x+4.5, y+4.5);
+        doc.setFontSize(8); doc.text(gh+" H.H", x+cw-3, y+4.5, {align:"right"});
+        doc.setTextColor(...MUT); doc.setFont("helvetica","normal"); doc.setFontSize(6.5);
+        let fe=g.fe; while (doc.getTextWidth(fe)>cw-20) fe=fe.slice(0,-2)+"…";
+        doc.text(fe, x+4.5, y+7.6);
+        y+=9.8;
+        for (const o of g.it){
+          doc.setFontSize(7); doc.setFont("helvetica","normal"); doc.setTextColor(...INK);
+          const lines=doc.splitTextToSize(o.ds, cw-4.5-21), lh=2.8, h=Math.max(lines.length*lh+3.4,6);
+          lines.forEach((l,k)=>doc.text(l, x+4.5, y+3+k*lh));
+          doc.setTextColor(...MUT); doc.setFontSize(6);
+          doc.text(`OS ${o.b}  ·  Prior. ${o.p}  ·  ${o.hh} h`, x+4.5, y+3+lines.length*lh-0.2);
+          const bx=x+cw-15.5, st=status[o.b];
+          doc.setFont("helvetica","bold"); doc.setFontSize(5.5);
+          doc.text("E", bx-0.6, y+3.6, {align:"right"}); doc.text("NE", bx+6.9, y+3.6, {align:"right"});
+          [["ex",bx],["nx",bx+7.5]].forEach(([k,xx])=>{
+            doc.setDrawColor(...INK); doc.setLineWidth(.2); doc.rect(xx,y+1.2,3.2,3.2,"S");
+            if (st===k){ doc.setLineWidth(.5); doc.line(xx+.5,y+1.7,xx+2.7,y+3.9); doc.line(xx+2.7,y+1.7,xx+.5,y+3.9); }
+          });
+          y+=h;
+          doc.setDrawColor(...LN); doc.setLineWidth(.15); doc.line(x+4.5,y-0.6,x+cw-3,y-0.6);
+        }
+        y+=1.8;
+      }
+      doc.setTextColor(...MUT); doc.setFont("helvetica","bold"); doc.setFontSize(7); doc.text("OBSERVAÇÕES", x+3, bottom-10);
+      doc.setDrawColor(...LN); doc.setLineWidth(.2);
+      for (let k=0;k<2;k++) doc.line(x+3, bottom-6+k*3.5, x+cw-3, bottom-6+k*3.5);
+    });
+    doc.setTextColor(...INK); doc.setFont("helvetica","bold"); doc.setFontSize(9);
+    doc.text(`Aderência da semana:  ${s.exhh} H.H executadas / ${s.hh} H.H programadas  =  ${pct(s.exhh,s.hh)} %`, M, H-24);
+    doc.setFont("helvetica","normal");
+    ["Responsável","Supervisor","Coordenação"].forEach((lab,k)=>{
+      const xx=W-M-(3-k)*80+5; doc.setDrawColor(...INK); doc.setLineWidth(.3); doc.line(xx,H-22,xx+70,H-22); doc.text(lab, xx, H-17);
+    });
+    doc.setTextColor(...MUT); doc.setFontSize(7);
+    doc.text(`Fonte: Programação Preventiva Condicional ${P.name.charAt(0)+P.name.slice(1).toLowerCase()}. Prioridade: A alta · M média · B baixa. Gerado do painel em ${gerado}.`, M, H-10);
+  });
+  return doc.output("arraybuffer");
+}
+document.getElementById("pdf-btn").addEventListener("click", ()=>{
+  const btn=document.getElementById("pdf-btn");
+  if (!window.jspdf){ setSync(false,"PDF indisponível: sem acesso à biblioteca"); return; }
+  const units = unit==="all" ? ["cle","qz"] : [unit];
+  const nome = unit==="all" ? "Clementina_Queiroz" : (unit==="cle"?"Clementina":"Queiroz");
+  btn.disabled=true; btn.textContent="Gerando…";
+  try {
+    const buf = buildPDF(units);
+    const url = URL.createObjectURL(new Blob([buf],{type:"application/pdf"}));
+    const a = document.createElement("a"); a.href=url; a.download=`Cronograma_Parada_${nome}_${DAYS[0].slice(8)}a${DAYS[DAYS.length-1].slice(8)}.pdf`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 5000);
+  } finally { btn.disabled=false; btn.textContent="Exportar PDF"; }
+});
+
+const nomeEl=document.getElementById("nome");
+try { nomeEl.value = localStorage.getItem("nome")||""; } catch(e){}
+nomeEl.addEventListener("change",()=>{ try{ localStorage.setItem("nome",nomeEl.value.trim()); }catch(e){} });
+
+render();
+async function carregar(){
+  if (!API_URL){ setSync(false,"Planilha não configurada: status só neste aparelho"); return; }
+  try {
+    const r = await fetch(API_URL+"?t="+Date.now());
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error);
+    for (const k of Object.keys(status)) if (!pending.has(k)) delete status[k];
+    for (const [b,v] of Object.entries(j.status||{})){
+      if (pending.has(b)) continue;
+      if (v.s==="ex"||v.s==="nx") status[b]=v.s;
+      meta[b]={by:v.by||"",at:v.at||""};
+    }
+    setSync(true,"Ao vivo · "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}));
+    render();
+  } catch(e){ setSync(false,"Sem conexão com a planilha · tentando de novo"); }
+}
+carregar();
+setInterval(()=>{ if (!document.hidden) carregar(); }, 20000);
+document.addEventListener("visibilitychange",()=>{ if (!document.hidden) carregar(); });
+</script>
+</body>
+</html>
