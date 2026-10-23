@@ -12,19 +12,23 @@
   --cle:#E8A900; --cle-soft:#FFF4D1; --qz:#1F4E9A; --qz-soft:#E3ECFA;
   --ok:#1E8A4C; --ok-soft:#DDF3E6; --nok:#C2362B; --nok-soft:#FBE3E0; --late:#C46A00; --late-soft:#FDEBD6;
   --today:#16202E;
+  --hit:#C2410C; --hit-soft:#FFEADB;
   --f-display:'Nexa','Red Hat Display',system-ui,sans-serif;
   --f-body:'Nexa','Red Hat Text',system-ui,sans-serif;
   --f-mono:'Red Hat Mono',ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --hit:#FB8A4E; --hit-soft:#3A2216;
   --bg:#0F151E; --panel:#18212D; --ink:#E8EDF4; --muted:#93A0B3; --line:#2A3646;
   --cle:#F5BE2A; --cle-soft:#3A3013; --qz:#6E9BE6; --qz-soft:#1A2A45;
   --ok:#47C27A; --ok-soft:#173527; --nok:#EF6B60; --nok-soft:#3D1D1A; --late:#F0A04B; --late-soft:#3B2914; --today:#E8EDF4; color-scheme:dark}}
 :root[data-theme="dark"]{
+  --hit:#FB8A4E; --hit-soft:#3A2216;
   --bg:#0F151E; --panel:#18212D; --ink:#E8EDF4; --muted:#93A0B3; --line:#2A3646;
   --cle:#F5BE2A; --cle-soft:#3A3013; --qz:#6E9BE6; --qz-soft:#1A2A45;
   --ok:#47C27A; --ok-soft:#173527; --nok:#EF6B60; --nok-soft:#3D1D1A; --late:#F0A04B; --late-soft:#3B2914; --today:#E8EDF4; color-scheme:dark}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.4}
 .wrap{padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1900px;margin:0 auto;display:grid;gap:18px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
@@ -97,6 +101,40 @@ h1{font-family:var(--f-display);font-weight:900;font-size:clamp(22px,3vw,34px);m
 .nome{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
 .nome input{font:500 13px var(--f-body);border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:7px 12px;width:200px;max-width:100%}
 .nome input:focus-visible{outline:2px solid var(--qz);outline-offset:1px}
+.wk{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.wk .lab{font:700 11px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+.wk button{font:600 13px var(--f-body);border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:7px 12px;border-radius:8px;cursor:pointer;display:grid;gap:1px;text-align:left;font-variant-numeric:tabular-nums}
+.wk button small{font:500 11px var(--f-body);color:var(--muted)}
+.wk button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.wk button[aria-pressed="true"] small{color:var(--bg);opacity:.75}
+.wk button .now{font:700 9px var(--f-mono);letter-spacing:.08em;color:var(--ok)}
+.wk button:focus-visible{outline:2px solid var(--qz);outline-offset:2px}
+.bar2{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between}
+.tabs{display:inline-flex;gap:4px;border-bottom:1px solid var(--line)}
+.tabs button{font:700 14px var(--f-body);border:0;background:transparent;color:var(--muted);padding:10px 14px;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.tabs button:focus-visible{outline:2px solid var(--qz);outline-offset:2px}
+.tabs .cnt{font:700 11px var(--f-mono);background:var(--line);color:var(--ink);border-radius:999px;padding:1px 7px;margin-left:6px}
+.tabs .cnt.hit{background:var(--hit);color:#fff}
+.kpi.hitk{border-color:var(--hit);background:var(--hit-soft)}
+.kpi.hitk .v{color:var(--hit)}
+.npu{display:grid;gap:10px}
+.npu h2{font:900 20px var(--f-display);margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.npu .note{font-size:12px;color:var(--muted)}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:980px;font-size:13px}
+th{font:700 11px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:10px;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.fr{font:900 15px var(--f-display);white-space:nowrap}
+tr.hit td{background:var(--hit-soft)}
+tr.hit td:first-child{box-shadow:inset 5px 0 0 var(--hit)}
+.chip{display:inline-block;font:700 11px var(--f-body);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.chip.hit{background:var(--hit);color:#fff}
+.chip.no{color:var(--muted);border:1px solid var(--line)}
+.filt{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer}
+.filt input{width:16px;height:16px;accent-color:var(--hit)}
+.sec-sep{height:6px}
 </style>
 </head>
 <body>
@@ -107,7 +145,7 @@ h1{font-family:var(--f-display);font-weight:900;font-size:clamp(22px,3vw,34px);m
       <h1 id="titulo">Cronograma de Parada</h1>
     </div>
     <div class="controls">
-      <div class="seg" role="group" aria-label="Unidade">
+      <div class="seg" id="units" role="group" aria-label="Unidade">
         <button id="u-all" data-u="all" aria-pressed="true">Ambas</button>
         <button id="u-cle" data-u="cle" aria-pressed="false">Clementina</button>
         <button id="u-qz" data-u="qz" aria-pressed="false">Queiroz</button>
@@ -118,16 +156,28 @@ h1{font-family:var(--f-display);font-weight:900;font-size:clamp(22px,3vw,34px);m
     </div>
   </header>
 
+  <nav class="wk" id="weeks" aria-label="Semana"></nav>
+
+  <div class="bar2">
+    <div class="tabs" role="tablist" aria-label="Visão">
+      <button role="tab" id="tab-prog" data-v="prog" aria-selected="true">Programadas<span class="cnt" id="cnt-prog"></span></button>
+      <button role="tab" id="tab-np" data-v="np" aria-selected="false">Não programadas<span class="cnt" id="cnt-np"></span></button>
+    </div>
+    <label class="filt" id="filt-wrap" hidden><input type="checkbox" id="filt">Mostrar só frotas que param nesta semana</label>
+  </div>
+
   <section class="kpis" id="kpis"></section>
 
-  <div class="legend">
+  <div class="legend" id="legend">
     <span class="tag"><span class="sw cle"></span>Clementina · Dener</span>
     <span class="tag"><span class="sw qz"></span>Queiroz · Marcio</span>
     <span>Toque no status da OS para alternar: Pendente → Executada → Não executada.</span>
     <span>Prioridade: A alta · M média · B baixa</span>
   </div>
 
-  <div class="board-scroll"><div class="board" id="board"></div></div>
+  <div class="board-scroll" id="board-wrap"><div class="board" id="board"></div></div>
+
+  <div id="np" hidden></div>
 
   <p class="foot">Fonte: Programação Preventiva Condicional Clementina e Queiroz. Status gravado na planilha de acompanhamento. OS pendente em dia já passado aparece como Atrasada. Passe o mouse no status para ver quem marcou.</p>
 </div>
@@ -137,18 +187,35 @@ h1{font-family:var(--f-display);font-weight:900;font-size:clamp(22px,3vw,34px);m
 <script src="dados.js"></script>
 <script>
 const RESP = {cle:"DENER", qz:"MARCIO"};
-const OS = [];
-for (const u of ["cle","qz"]) for (const l of RAW[u].split("\n")) {
-  const [d,fe,b,fr,p,ds,hh] = l.split("|");
-  OS.push({u,d,fe,b,fr,p,ds,hh:+hh});
+const UNOME = {cle:"Clementina", qz:"Queiroz"};
+let W = null, OS = [], NP = [], DAYS = [], SEMANA = "", view = "prog", soHit = false;
+const lines = t => (t||"").split("\n").map(l=>l.trim()).filter(Boolean);
+function pickWeek(){
+  const h = (location.hash.match(/^#s(\d+)$/)||[])[1];
+  if (h){ const w = SEMANAS.find(w=>String(w.num)===h); if (w) return w; }
+  const tk = todayKey();
+  return SEMANAS.find(w=>w.days.includes(tk)) || SEMANAS.find(w=>w.days[w.days.length-1] >= tk) || SEMANAS[SEMANAS.length-1];
+}
+function loadWeek(w){
+  W = w; DAYS = w.days; SEMANA = w.label; OS = []; NP = [];
+  for (const u of ["cle","qz"]) for (const l of lines(w.prog[u])) {
+    const [d,fe,b,fr,p,ds,hh] = l.split("|"); OS.push({u,d,fe,b,fr,p,ds,hh:+hh});
+  }
+  const stop = {};   // frota -> [{d,u}]
+  for (const o of OS) (stop[o.fr] = stop[o.fr]||[]).some(x=>x.d===o.d) || stop[o.fr].push({d:o.d,u:o.u});
+  for (const u of ["cle","qz"]) for (const l of lines(w.np && w.np[u])) {
+    const [fe,b,fr,dsx,hh,resp] = l.split("|");
+    const m = dsx.match(/^\s*([AMB])\s*-\s*(.*)$/);
+    NP.push({u,fe,b,fr,p:m?m[1]:"–",ds:m?m[2]:dsx,hh:+hh,resp:resp||RESP[u],hit:(stop[fr]||[]).sort((a,b)=>a.d<b.d?-1:1)});
+  }
+  document.getElementById("titulo").textContent = `Cronograma de Parada · Semana ${w.num} · ${w.label}`;
+  document.title = `Painel de Parada · Semana ${w.num}`;
 }
 const WD = ["Dom","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
 const status = {};           // boletim -> "ex" | "nx"
 const meta = {};             // boletim -> {by, at}
 const pending = new Set();
 let unit = "all", canWrite = true;
-document.getElementById("titulo").textContent = "Cronograma de Parada · " + SEMANA;
-document.title = "Painel de Parada · " + SEMANA;
 try { unit = localStorage.getItem("unit") || "all"; } catch(e) {}
 
 function todayKey(){ const t=new Date(); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); }
@@ -166,15 +233,70 @@ function summary(list){
 }
 function bar(s){ return `<div class="bar" aria-hidden="true"><i class="b-ok" style="width:${pct(s.exhh,s.hh)}%"></i><i class="b-nok" style="width:${pct(s.nxhh,s.hh)}%"></i></div>`; }
 
+const ddmm = d => d.slice(8)+"/"+d.slice(5,7);
+function renderWeeks(){
+  const tk = todayKey();
+  document.getElementById("weeks").innerHTML = '<span class="lab">Semana</span>' + SEMANAS.map(w=>{
+    const now = w.days.includes(tk);
+    return `<button id="wk-${w.num}" data-w="${w.num}" aria-pressed="${w===W}">Semana ${w.num}${now?' <span class="now">ATUAL</span>':''}<small>${ddmm(w.days[0])} a ${ddmm(w.days[w.days.length-1])}</small></button>`;
+  }).join("");
+}
 function render(){
-  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.u===unit));
+  renderWeeks();
+  document.querySelectorAll("#units button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.u===unit));
+  document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.v===view));
+  const npl = NP.filter(o=>unit==="all"||o.u===unit), nph = npl.filter(o=>o.hit.length).length;
+  document.getElementById("cnt-prog").textContent = OS.filter(o=>unit==="all"||o.u===unit).length;
+  const cn = document.getElementById("cnt-np"); cn.textContent = nph ? `${npl.length} · ${nph} em frotas da semana` : npl.length; cn.classList.toggle("hit", nph>0);
+  const isNP = view==="np";
+  document.getElementById("board-wrap").hidden = isNP;
+  document.getElementById("legend").hidden = isNP;
+  document.getElementById("np").hidden = !isNP;
+  document.getElementById("filt-wrap").hidden = !isNP;
+  document.getElementById("pdf-btn").hidden = isNP;
+  if (isNP) return renderNP();
+  renderProg();
+}
+function renderNP(){
+  const list = NP.filter(o=>unit==="all"||o.u===unit);
+  const hit = list.filter(o=>o.hit.length);
+  const hh = a => a.reduce((s,o)=>s+o.hh,0);
+  const frH = new Set(hit.map(o=>o.fr)).size;
+  const per = u => { const a=NP.filter(o=>o.u===u), h=a.filter(o=>o.hit.length); return `${a.length} OS · ${hh(a)} H.H · <b>${h.length}</b> em frotas da semana`; };
+  document.getElementById("kpis").innerHTML = `
+    <div class="kpi"><span class="l">Não programadas</span><span class="v">${list.length}</span><span class="s">${new Set(list.map(o=>o.fr)).size} frotas com pendência</span></div>
+    <div class="kpi"><span class="l">H.H não programadas</span><span class="v">${fmt(hh(list))}</span><span class="s">liberadas para programação</span></div>
+    <div class="kpi hitk"><span class="l">Em frotas que param na semana</span><span class="v">${hit.length}</span><span class="s">${hh(hit)} H.H em ${frH} frota${frH===1?"":"s"}: dá para aproveitar a parada</span></div>
+    <div class="kpi"><span class="l">Por unidade</span><div class="unitk">
+      <div><span class="tag"><span class="sw cle"></span>Clementina</span><span class="s">${per("cle")}</span></div>
+      <div><span class="tag"><span class="sw qz"></span>Queiroz</span><span class="s">${per("qz")}</span></div>
+    </div></div>`;
+  const units = unit==="all" ? ["cle","qz"] : [unit];
+  document.getElementById("np").innerHTML = units.map(u=>{
+    let rows = NP.filter(o=>o.u===u);
+    const nh = rows.filter(o=>o.hit.length).length;
+    if (soHit) rows = rows.filter(o=>o.hit.length);
+    rows = rows.slice().sort((a,b)=> (b.hit.length>0)-(a.hit.length>0) || (a.hit[0]?.d||"").localeCompare(b.hit[0]?.d||"") || a.fe.localeCompare(b.fe) || a.fr.localeCompare(b.fr));
+    const body = rows.map(o=>`<tr class="${o.hit.length?'hit':''}">
+      <td>${o.hit.length ? o.hit.map(h=>`<span class="chip hit">Para ${ddmm(h.d)}${h.u!==o.u?' · '+UNOME[h.u]:''}</span>`).join(" ") : '<span class="chip no">Sem parada</span>'}</td>
+      <td class="fr">${o.fr}</td><td>${o.fe}</td><td class="n">${o.b}</td><td><span class="pr">${o.p}</span></td>
+      <td>${o.ds}</td><td class="n">${o.hh}</td><td>${o.resp}</td></tr>`).join("");
+    return `<section class="npu"><h2><span class="sw ${u}"></span>${UNOME[u]} <span class="chip ${nh?'hit':'no'}">${nh} em frotas da semana</span></h2>
+      ${W.npNota && W.npNota[u] ? `<div class="note">${W.npNota[u]}</div>` : ''}
+      <div class="tbl"><table><thead><tr><th>Parada na semana</th><th>Frota</th><th>Frente</th><th>Boletim</th><th>Prior.</th><th>Descrição</th><th>H.H</th><th>Responsável</th></tr></thead>
+      <tbody>${body || `<tr><td colspan="8" class="note">${soHit?'Nenhuma não programada em frota que para nesta semana.':'Sem não programadas registradas para esta semana.'}</td></tr>`}</tbody></table></div></section>`;
+  }).join('<div class="sec-sep"></div>');
+}
+function renderProg(){
   const list = OS.filter(o=>unit==="all"||o.u===unit);
+  const nphit = NP.filter(o=>(unit==="all"||o.u===unit) && o.hit.length);
   const S = summary(list), C = summary(OS.filter(o=>o.u==="cle")), Q = summary(OS.filter(o=>o.u==="qz"));
   document.getElementById("kpis").innerHTML = `
     <div class="kpi"><span class="l">OS programadas</span><span class="v">${S.n}</span><span class="s">${S.frotas} frotas em parada</span></div>
     <div class="kpi"><span class="l">H.H programadas</span><span class="v">${fmt(S.hh)}</span><span class="s">${fmt(S.exhh)} H.H executadas</span></div>
     <div class="kpi"><span class="l">Aderência (H.H)</span><span class="v">${pct(S.exhh,S.hh)}%</span>${bar(S)}<span class="s">${S.ex} executadas · ${S.nx} não executadas</span></div>
     <div class="kpi"><span class="l">Atrasadas</span><span class="v" style="color:${S.late?'var(--late)':'inherit'}">${S.late}</span><span class="s">pendentes de dias já passados</span></div>
+    <div class="kpi ${nphit.length?'hitk':''}"><span class="l">Não programadas nestas frotas</span><span class="v">${nphit.length}</span><span class="s">${nphit.reduce((s,o)=>s+o.hh,0)} H.H que podem entrar na parada · ver aba Não programadas</span></div>
     <div class="kpi"><span class="l">Por unidade</span><div class="unitk">
       <div><span class="tag"><span class="sw cle"></span>Clementina</span><span class="s">${C.n} OS · ${C.hh} H.H · ${pct(C.exhh,C.hh)}%</span>${bar(C)}</div>
       <div><span class="tag"><span class="sw qz"></span>Queiroz</span><span class="s">${Q.n} OS · ${Q.hh} H.H · ${pct(Q.exhh,Q.hh)}%</span>${bar(Q)}</div>
@@ -203,7 +325,17 @@ function render(){
   }).join("");
 }
 
-document.querySelector(".seg").addEventListener("click", e=>{
+document.getElementById("weeks").addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  const w = SEMANAS.find(w=>String(w.num)===b.dataset.w); if(!w) return;
+  loadWeek(w); try{ history.replaceState(null,"","#s"+w.num); }catch(err){} render();
+});
+document.querySelector(".tabs").addEventListener("click", e=>{
+  const b = e.target.closest("button"); if(!b) return;
+  view = b.dataset.v; try{ localStorage.setItem("view",view);}catch(err){} render();
+});
+document.getElementById("filt").addEventListener("change", e=>{ soHit = e.target.checked; render(); });
+document.getElementById("units").addEventListener("click", e=>{
   const b = e.target.closest("button"); if(!b) return;
   unit = b.dataset.u; try{ localStorage.setItem("unit",unit);}catch(e){} render();
 });
@@ -247,7 +379,7 @@ function buildPDF(units){
     doc.setTextColor(...P.fg); doc.setFont("helvetica","bold"); doc.setFontSize(22);
     doc.text("CRONOGRAMA DE PARADA · PREVENTIVA CONDICIONAL · "+P.name, M, 15);
     doc.setFont("helvetica","normal"); doc.setFontSize(11);
-    doc.text(`Semana ${SEMANA}  ·  Responsável: ${RESP[u]}  ·  ${s.n} OS  ·  ${s.hh} H.H  ·  ${s.frotas} frotas  ·  Executadas: ${s.ex} OS / ${s.exhh} H.H (${pct(s.exhh,s.hh)}%)`, M, 23);
+    doc.text(`Semana ${W.num} · ${SEMANA}  ·  Responsável: ${RESP[u]}  ·  ${s.n} OS  ·  ${s.hh} H.H  ·  ${s.frotas} frotas  ·  Executadas: ${s.ex} OS / ${s.exhh} H.H (${pct(s.exhh,s.hh)}%)`, M, 23);
     doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.text("CLEALCO · MANUTENÇÃO AUTOMOTIVA", W-M, 15, {align:"right"});
     doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.text("E = executada   NE = não executada   (marcado = status no painel em "+gerado+")", W-M, 23, {align:"right"});
     const top=34, bottom=H-31, cw=(W-2*M-5*G)/6;
@@ -316,7 +448,7 @@ document.getElementById("pdf-btn").addEventListener("click", ()=>{
   try {
     const buf = buildPDF(units);
     const url = URL.createObjectURL(new Blob([buf],{type:"application/pdf"}));
-    const a = document.createElement("a"); a.href=url; a.download=`Cronograma_Parada_${nome}_${DAYS[0].slice(8)}a${DAYS[DAYS.length-1].slice(8)}.pdf`;
+    const a = document.createElement("a"); a.href=url; a.download=`Cronograma_Parada_S${W.num}_${nome}_${DAYS[0].slice(8)}a${DAYS[DAYS.length-1].slice(8)}.pdf`;
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 5000);
   } finally { btn.disabled=false; btn.textContent="Exportar PDF"; }
 });
@@ -325,6 +457,8 @@ const nomeEl=document.getElementById("nome");
 try { nomeEl.value = localStorage.getItem("nome")||""; } catch(e){}
 nomeEl.addEventListener("change",()=>{ try{ localStorage.setItem("nome",nomeEl.value.trim()); }catch(e){} });
 
+try { view = localStorage.getItem("view")==="np" ? "np" : "prog"; } catch(e) {}
+loadWeek(pickWeek());
 render();
 async function carregar(){
   if (!API_URL){ setSync(false,"Planilha não configurada: status só neste aparelho"); return; }

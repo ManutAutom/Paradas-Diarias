@@ -30,10 +30,17 @@ As abas **Status** e **Historico** são criadas sozinhas na primeira marcação.
 3. Em um ou dois minutos o painel fica em `https://SEU-USUARIO.github.io/painel-parada/`.
 4. Mande esse link para a liderança.
 
-## 3. Nova semana de parada
+## 3. Nova semana de parada (histórico)
 
-Edite `dados.js`: troque `SEMANA`, `DAYS` e as linhas de cada unidade (formato `data|frente|boletim|frota|prioridade|descrição|H.H`).
-Os status antigos continuam na planilha. Se quiser zerar, limpe as linhas da aba **Status** (mantenha o cabeçalho).
+O `dados.js` guarda todas as semanas na lista `SEMANAS`, e o painel mostra um botão por semana (número da semana ISO) para consultar o histórico.
+Para uma semana nova, copie o bloco da última semana para o **fim** da lista e troque:
+- `num`, `label` e `days` (as seis datas, segunda a sábado);
+- `prog`: programadas, uma linha por OS no formato `data|frente|boletim|frota|prioridade|descrição|H.H`;
+- `np`: não programadas, no formato `frente|boletim|frota|descrição|H.H|responsável` (descrição com `A-`, `M-` ou `B-` na frente);
+- `npNota`: de quando é a lista de não programadas.
+
+Na aba **Não programadas**, as OS de frotas que já vão parar na semana ficam destacadas em laranja, com o dia da parada.
+Os status continuam na planilha; não apague as semanas antigas do `dados.js` para manter o histórico.
 
 ## Observações
 
