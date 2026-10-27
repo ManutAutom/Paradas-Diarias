@@ -12,23 +12,31 @@
   --cle:#E8A900; --cle-soft:#FFF4D1; --qz:#1F4E9A; --qz-soft:#E3ECFA;
   --ok:#1E8A4C; --ok-soft:#DDF3E6; --nok:#C2362B; --nok-soft:#FBE3E0; --late:#C46A00; --late-soft:#FDEBD6;
   --today:#16202E;
-  --hit:#C2410C; --hit-soft:#FFEADB;
+  --hit:#C2410C; --hit-soft:#FFEADB; --sis:#6B4FBB; --sis-soft:#EFEAFB;
   --f-display:'Nexa','Red Hat Display',system-ui,sans-serif;
   --f-body:'Nexa','Red Hat Text',system-ui,sans-serif;
   --f-mono:'Red Hat Mono',ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --hit:#FB8A4E; --hit-soft:#3A2216;
+  --hit:#FB8A4E; --hit-soft:#3A2216; --sis:#A68CF2; --sis-soft:#2A2340;
   --bg:#0F151E; --panel:#18212D; --ink:#E8EDF4; --muted:#93A0B3; --line:#2A3646;
   --cle:#F5BE2A; --cle-soft:#3A3013; --qz:#6E9BE6; --qz-soft:#1A2A45;
   --ok:#47C27A; --ok-soft:#173527; --nok:#EF6B60; --nok-soft:#3D1D1A; --late:#F0A04B; --late-soft:#3B2914; --today:#E8EDF4; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --hit:#FB8A4E; --hit-soft:#3A2216;
+  --hit:#FB8A4E; --hit-soft:#3A2216; --sis:#A68CF2; --sis-soft:#2A2340;
   --bg:#0F151E; --panel:#18212D; --ink:#E8EDF4; --muted:#93A0B3; --line:#2A3646;
   --cle:#F5BE2A; --cle-soft:#3A3013; --qz:#6E9BE6; --qz-soft:#1A2A45;
   --ok:#47C27A; --ok-soft:#173527; --nok:#EF6B60; --nok-soft:#3D1D1A; --late:#F0A04B; --late-soft:#3B2914; --today:#E8EDF4; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+.os li.sis{background:var(--sis-soft);box-shadow:inset 3px 0 0 var(--sis)}
+.os li.sis .d{font-weight:700;color:var(--sis);letter-spacing:.02em}
+.os li.sis.ex .d{color:var(--muted)}
+.sisb{font:700 10px var(--f-mono);letter-spacing:.06em;color:var(--sis);border:1px solid var(--sis);border-radius:4px;padding:1px 5px;margin-top:4px;display:inline-block}
+.sw.sis{background:var(--sis)}
+.kpi.sisk .v{color:var(--sis)}
+.ch .fr{white-space:nowrap}
+.ch .hh{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.4}
 .wrap{padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1900px;margin:0 auto;display:grid;gap:18px}
 header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
@@ -141,7 +149,7 @@ tr.hit td:first-child{box-shadow:inset 5px 0 0 var(--hit)}
 <div class="wrap">
   <header>
     <div>
-      <div class="eyebrow">Clealco · Manutenção Automotiva · Preventiva condicional</div>
+      <div class="eyebrow">Clealco · Manutenção Automotiva · Preventiva condicional e sistemática</div>
       <h1 id="titulo">Cronograma de Parada</h1>
     </div>
     <div class="controls">
@@ -171,6 +179,7 @@ tr.hit td:first-child{box-shadow:inset 5px 0 0 var(--hit)}
   <div class="legend" id="legend">
     <span class="tag"><span class="sw cle"></span>Clementina · Dener</span>
     <span class="tag"><span class="sw qz"></span>Queiroz · Marcio</span>
+    <span class="tag"><span class="sw sis"></span>Preventiva sistemática</span>
     <span>Toque no status da OS para alternar: Pendente → Executada → Não executada.</span>
     <span>Prioridade: A alta · M média · B baixa</span>
   </div>
@@ -188,7 +197,7 @@ tr.hit td:first-child{box-shadow:inset 5px 0 0 var(--hit)}
 <script>
 const RESP = {cle:"DENER", qz:"MARCIO"};
 const UNOME = {cle:"Clementina", qz:"Queiroz"};
-let W = null, OS = [], NP = [], DAYS = [], SEMANA = "", view = "prog", soHit = false;
+let W = null, OS = [], SIS = [], NP = [], DAYS = [], SEMANA = "", view = "prog", soHit = false;
 const lines = t => (t||"").split("\n").map(l=>l.trim()).filter(Boolean);
 function pickWeek(){
   const h = (location.hash.match(/^#s(\d+)$/)||[])[1];
@@ -197,12 +206,16 @@ function pickWeek(){
   return SEMANAS.find(w=>w.days.includes(tk)) || SEMANAS.find(w=>w.days[w.days.length-1] >= tk) || SEMANAS[SEMANAS.length-1];
 }
 function loadWeek(w){
-  W = w; DAYS = w.days; SEMANA = w.label; OS = []; NP = [];
+  W = w; DAYS = w.days; SEMANA = w.label; OS = []; SIS = []; NP = [];
   for (const u of ["cle","qz"]) for (const l of lines(w.prog[u])) {
     const [d,fe,b,fr,p,ds,hh] = l.split("|"); OS.push({u,d,fe,b,fr,p,ds,hh:+hh});
   }
+  for (const u of ["cle","qz"]) for (const l of lines(w.sist && w.sist[u])) {
+    const [d,fe,fr,mod,os] = l.split("|");
+    SIS.push({u,d,fe,fr,mod,os,sis:true,b:"9"+(u==="cle"?"1":"2")+os,p:"S",ds:"PREVENTIVA SISTEMÁTICA",hh:0});
+  }
   const stop = {};   // frota -> [{d,u}]
-  for (const o of OS) (stop[o.fr] = stop[o.fr]||[]).some(x=>x.d===o.d) || stop[o.fr].push({d:o.d,u:o.u});
+  for (const o of OS.concat(SIS)) (stop[o.fr] = stop[o.fr]||[]).some(x=>x.d===o.d) || stop[o.fr].push({d:o.d,u:o.u});
   for (const u of ["cle","qz"]) for (const l of lines(w.np && w.np[u])) {
     const [fe,b,fr,dsx,hh,resp] = l.split("|");
     const m = dsx.match(/^\s*([AMB])\s*-\s*(.*)$/);
@@ -246,7 +259,7 @@ function render(){
   document.querySelectorAll("#units button").forEach(b=>b.setAttribute("aria-pressed", b.dataset.u===unit));
   document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.v===view));
   const npl = NP.filter(o=>unit==="all"||o.u===unit), nph = npl.filter(o=>o.hit.length).length;
-  document.getElementById("cnt-prog").textContent = OS.filter(o=>unit==="all"||o.u===unit).length;
+  document.getElementById("cnt-prog").textContent = OS.concat(SIS).filter(o=>unit==="all"||o.u===unit).length;
   const cn = document.getElementById("cnt-np"); cn.textContent = nph ? `${npl.length} · ${nph} em frotas da semana` : npl.length; cn.classList.toggle("hit", nph>0);
   const isNP = view==="np";
   document.getElementById("board-wrap").hidden = isNP;
@@ -291,11 +304,13 @@ function renderProg(){
   const list = OS.filter(o=>unit==="all"||o.u===unit);
   const nphit = NP.filter(o=>(unit==="all"||o.u===unit) && o.hit.length);
   const S = summary(list), C = summary(OS.filter(o=>o.u==="cle")), Q = summary(OS.filter(o=>o.u==="qz"));
+  const sl = SIS.filter(o=>unit==="all"||o.u===unit), sEx = sl.filter(o=>status[o.b]==="ex").length, sNx = sl.filter(o=>status[o.b]==="nx").length, sLate = sl.filter(o=>stOf(o)==="late").length;
   document.getElementById("kpis").innerHTML = `
-    <div class="kpi"><span class="l">OS programadas</span><span class="v">${S.n}</span><span class="s">${S.frotas} frotas em parada</span></div>
+    <div class="kpi"><span class="l">OS condicionais</span><span class="v">${S.n}</span><span class="s">${S.frotas} frotas em parada</span></div>
+    <div class="kpi sisk"><span class="l">Preventivas sistemáticas</span><span class="v">${sEx}/${sl.length}</span><span class="s">executadas${sNx?' · '+sNx+' não executadas':''}${sLate?' · '+sLate+' atrasadas':''}</span></div>
     <div class="kpi"><span class="l">H.H programadas</span><span class="v">${fmt(S.hh)}</span><span class="s">${fmt(S.exhh)} H.H executadas</span></div>
     <div class="kpi"><span class="l">Aderência (H.H)</span><span class="v">${pct(S.exhh,S.hh)}%</span>${bar(S)}<span class="s">${S.ex} executadas · ${S.nx} não executadas</span></div>
-    <div class="kpi"><span class="l">Atrasadas</span><span class="v" style="color:${S.late?'var(--late)':'inherit'}">${S.late}</span><span class="s">pendentes de dias já passados</span></div>
+    <div class="kpi"><span class="l">Atrasadas</span><span class="v" style="color:${S.late?'var(--late)':'inherit'}">${S.late}</span><span class="s">condicionais pendentes de dias já passados</span></div>
     <div class="kpi ${nphit.length?'hitk':''}"><span class="l">Não programadas nestas frotas</span><span class="v">${nphit.length}</span><span class="s">${nphit.reduce((s,o)=>s+o.hh,0)} H.H que podem entrar na parada · ver aba Não programadas</span></div>
     <div class="kpi"><span class="l">Por unidade</span><div class="unitk">
       <div><span class="tag"><span class="sw cle"></span>Clementina</span><span class="s">${C.n} OS · ${C.hh} H.H · ${pct(C.exhh,C.hh)}%</span>${bar(C)}</div>
@@ -305,22 +320,23 @@ function renderProg(){
   const tk = todayKey();
   document.getElementById("board").innerHTML = DAYS.map(d=>{
     const dl = list.filter(o=>o.d===d), s = summary(dl);
+    const dsis = SIS.filter(o=>o.d===d && (unit==="all"||o.u===unit));
     const dt = new Date(d+"T12:00:00");
     const groups = [];
-    for (const o of dl){ let g = groups.find(g=>g.fr===o.fr&&g.u===o.u); if(!g){g={fr:o.fr,u:o.u,fe:o.fe,items:[]};groups.push(g);} g.items.push(o); }
+    for (const o of dsis.concat(dl)){ let g = groups.find(g=>g.fr===o.fr&&g.u===o.u); if(!g){g={fr:o.fr,u:o.u,fe:o.fe,items:[]};groups.push(g);} g.items.push(o); }
     groups.sort((a,b)=>a.u.localeCompare(b.u)||b.items.reduce((x,o)=>x+o.hh,0)-a.items.reduce((x,o)=>x+o.hh,0));
     const cards = groups.map(g=>{
-      const gh = g.items.reduce((x,o)=>x+o.hh,0), gd = g.items.filter(o=>status[o.b]==="ex").length;
+      const gc = g.items.filter(o=>!o.sis), gh = gc.reduce((x,o)=>x+o.hh,0), gd = gc.filter(o=>status[o.b]==="ex").length, gs = g.items.some(o=>o.sis);
       return `<article class="card ${g.u}">
         <div class="ch"><div><div class="fr">Frota ${g.fr}</div><div class="fe">${g.fe}</div></div>
-        <div class="hh">${gh} H.H<small>${gd}/${g.items.length} OS</small></div></div>
-        <ul class="os">${g.items.map(o=>{ const st=stOf(o); return `<li class="${st}">
-          <div><div class="d">${o.ds}</div><div class="m"><span>OS ${o.b}</span><span class="pr">${o.p}</span><span>${o.hh} h</span><span>${RESP[o.u]}</span></div></div>
-          <button class="st ${st}" id="st-${o.b}" data-b="${o.b}" ${canWrite?"":"disabled"} title="${meta[o.b]&&meta[o.b].by?(LABEL[st]+' por '+meta[o.b].by+(meta[o.b].at?' em '+meta[o.b].at:'')):''}" aria-label="Status da OS ${o.b}: ${LABEL[st]}">${LABEL[st]}</button></li>`;}).join("")}</ul>
+        <div class="hh">${gc.length?gh+' H.H':''}<small>${gc.length?gd+'/'+gc.length+' OS':''}</small>${gs?'<span class="sisb">SISTEMÁTICA</span>':''}</div></div>
+        <ul class="os">${g.items.map(o=>{ const st=stOf(o); return `<li class="${st}${o.sis?' sis':''}">
+          <div><div class="d">${o.ds}</div><div class="m">${o.sis?`<span>OS ${o.os}</span><span>${o.mod}</span>`:`<span>OS ${o.b}</span><span class="pr">${o.p}</span><span>${o.hh} h</span><span>${RESP[o.u]}</span>`}</div></div>
+          <button class="st ${st}" id="st-${o.b}" data-b="${o.b}" ${canWrite?"":"disabled"} title="${meta[o.b]&&meta[o.b].by?(LABEL[st]+' por '+meta[o.b].by+(meta[o.b].at?' em '+meta[o.b].at:'')):''}" aria-label="Status da OS ${o.sis?o.os:o.b}: ${LABEL[st]}">${LABEL[st]}</button></li>`;}).join("")}</ul>
       </article>`;}).join("");
     return `<section class="day ${d===tk?'is-today':''}">
       <div class="dh"><div class="dh-top"><div><div class="wd">${WD[dt.getDay()]}</div><div class="dt">${d.slice(8)}/${d.slice(5,7)}</div></div>${d===tk?'<span class="today">Hoje</span>':''}</div>
-      <div class="nums"><span><b>${s.n}</b> OS</span><span><b>${s.hh}</b> H.H</span><span><b>${s.frotas}</b> frotas</span><span><b>${pct(s.exhh,s.hh)}%</b> exec.</span></div>${bar(s)}</div>
+      <div class="nums"><span><b>${s.n}</b> OS</span><span><b>${s.hh}</b> H.H</span><span><b>${dsis.length}</b> sist.</span><span><b>${pct(s.exhh,s.hh)}%</b> exec.</span></div>${bar(s)}</div>
       <div class="cards">${cards || '<div class="empty">Sem parada programada</div>'}</div></section>`;
   }).join("");
 }
@@ -347,11 +363,11 @@ document.getElementById("board").addEventListener("click", async e=>{
   if (next==="pd") delete status[id]; else status[id]=next;
   render();
   if (!API_URL) return;
-  const o = OS.find(x=>x.b===id), by = (document.getElementById("nome").value||"").trim();
+  const o = OS.concat(SIS).find(x=>x.b===id), by = (document.getElementById("nome").value||"").trim();
   pending.add(id);
   try {
     const r = await fetch(API_URL, {method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body: JSON.stringify({b:id, s:next, by, u:o.u==="cle"?"Clementina":"Queiroz", d:o.d, fr:o.fr, fe:o.fe, ds:o.ds, hh:o.hh})});
+      body: JSON.stringify({b:id, s:next, by, u:o.u==="cle"?"Clementina":"Queiroz", d:o.d, fr:o.fr, fe:o.fe, ds:o.sis?`PREVENTIVA SISTEMÁTICA – OS ${o.os} – ${o.mod}`:o.ds, hh:o.hh})});
     const j = await r.json();
     if (!j.ok) throw new Error(j.error||"falha");
     setSync(true,"Ao vivo · salvo");
@@ -374,44 +390,45 @@ function buildPDF(units){
   const gerado = new Date().toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"});
   units.forEach((u,pi)=>{
     if (pi) doc.addPage();
-    const P=PU[u], rows=OS.filter(o=>o.u===u), s=summary(rows);
+    const P=PU[u], rows=OS.filter(o=>o.u===u), s=summary(rows), srows=SIS.filter(o=>o.u===u), sEx=srows.filter(o=>status[o.b]==="ex").length;
     doc.setFillColor(...P.col); doc.rect(0,0,W,30,"F");
     doc.setTextColor(...P.fg); doc.setFont("helvetica","bold"); doc.setFontSize(22);
-    doc.text("CRONOGRAMA DE PARADA · PREVENTIVA CONDICIONAL · "+P.name, M, 15);
+    doc.text("CRONOGRAMA DE PARADA · PREVENTIVA CONDICIONAL E SISTEMÁTICA · "+P.name, M, 15);
     doc.setFont("helvetica","normal"); doc.setFontSize(11);
-    doc.text(`Semana ${W.num} · ${SEMANA}  ·  Responsável: ${RESP[u]}  ·  ${s.n} OS  ·  ${s.hh} H.H  ·  ${s.frotas} frotas  ·  Executadas: ${s.ex} OS / ${s.exhh} H.H (${pct(s.exhh,s.hh)}%)`, M, 23);
+    doc.text(`Semana ${W.num} · ${SEMANA}  ·  Responsável: ${RESP[u]}  ·  ${s.n} OS  ·  ${s.hh} H.H  ·  ${s.frotas} frotas  ·  Executadas: ${s.ex} OS / ${s.exhh} H.H (${pct(s.exhh,s.hh)}%)  ·  Sistemáticas: ${sEx}/${srows.length}`, M, 23);
     doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.text("CLEALCO · MANUTENÇÃO AUTOMOTIVA", W-M, 15, {align:"right"});
     doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.text("E = executada   NE = não executada   (marcado = status no painel em "+gerado+")", W-M, 23, {align:"right"});
     const top=34, bottom=H-31, cw=(W-2*M-5*G)/6;
     DAYS.forEach((d,i)=>{
-      const x=M+i*(cw+G), dl=rows.filter(o=>o.d===d), ds=summary(dl);
+      const x=M+i*(cw+G), dl=rows.filter(o=>o.d===d), ds=summary(dl), dsl=srows.filter(o=>o.d===d);
       doc.setDrawColor(...LN); doc.setLineWidth(.3); doc.roundedRect(x,top,cw,bottom-top,2,2,"S");
       doc.setFillColor(...INK); doc.roundedRect(x,top,cw,14,2,2,"F"); doc.rect(x,top+10,cw,4,"F");
       doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`${d.slice(8)}/${d.slice(5,7)}`, x+3, top+8);
       doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.text(WDP[i], x+3, top+12);
-      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.text(`${ds.n} OS · ${ds.hh} H.H`, x+cw-3, top+7.5, {align:"right"});
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.text(`${ds.n} OS · ${ds.hh} H.H${dsl.length?' · '+dsl.length+' sist.':''}`, x+cw-3, top+7.5, {align:"right"});
       doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.text(`Exec.: ${ds.ex} / ${ds.n}`, x+cw-3, top+12, {align:"right"});
       let y=top+17;
-      if (!dl.length){ doc.setTextColor(...MUT); doc.setFontSize(9); doc.text("Sem parada programada", x+cw/2, y+8, {align:"center"}); }
+      if (!dl.length && !dsl.length){ doc.setTextColor(...MUT); doc.setFontSize(9); doc.text("Sem parada programada", x+cw/2, y+8, {align:"center"}); }
       const groups=[];
-      for (const o of dl){ let g=groups.find(g=>g.fr===o.fr); if(!g){g={fr:o.fr,fe:o.fe,it:[]};groups.push(g);} g.it.push(o); }
+      for (const o of dsl.concat(dl)){ let g=groups.find(g=>g.fr===o.fr); if(!g){g={fr:o.fr,fe:o.fe,it:[]};groups.push(g);} g.it.push(o); }
       groups.sort((a,b)=>b.it.reduce((s,o)=>s+o.hh,0)-a.it.reduce((s,o)=>s+o.hh,0));
       for (const g of groups){
         const gh=g.it.reduce((s,o)=>s+o.hh,0);
         doc.setFillColor(...P.soft); doc.rect(x+1.5,y,cw-3,8.5,"F");
         doc.setFillColor(...P.col); doc.rect(x+1.5,y,1.6,8.5,"F");
         doc.setTextColor(...INK); doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.text("FROTA "+g.fr, x+4.5, y+4.5);
-        doc.setFontSize(8); doc.text(gh+" H.H", x+cw-3, y+4.5, {align:"right"});
+        doc.setFontSize(8); doc.text(g.it.some(o=>!o.sis)?gh+" H.H":"SISTEMÁTICA", x+cw-3, y+4.5, {align:"right"});
         doc.setTextColor(...MUT); doc.setFont("helvetica","normal"); doc.setFontSize(6.5);
         let fe=g.fe; while (doc.getTextWidth(fe)>cw-20) fe=fe.slice(0,-2)+"…";
         doc.text(fe, x+4.5, y+7.6);
         y+=9.8;
         for (const o of g.it){
-          doc.setFontSize(7); doc.setFont("helvetica","normal"); doc.setTextColor(...INK);
+          doc.setFontSize(7); doc.setFont("helvetica", o.sis?"bold":"normal"); doc.setTextColor(...(o.sis?[107,79,187]:INK));
           const lines=doc.splitTextToSize(o.ds, cw-4.5-21), lh=2.8, h=Math.max(lines.length*lh+3.4,6);
+          if (o.sis){ doc.setFillColor(239,234,251); doc.rect(x+3.2,y,cw-4.7,h-0.6,"F"); doc.setFillColor(107,79,187); doc.rect(x+3.2,y,0.8,h-0.6,"F"); }
           lines.forEach((l,k)=>doc.text(l, x+4.5, y+3+k*lh));
-          doc.setTextColor(...MUT); doc.setFontSize(6);
-          doc.text(`OS ${o.b}  ·  Prior. ${o.p}  ·  ${o.hh} h`, x+4.5, y+3+lines.length*lh-0.2);
+          doc.setTextColor(...MUT); doc.setFont("helvetica","normal"); doc.setFontSize(6);
+          doc.text(o.sis ? `OS ${o.os}  ·  ${o.mod}` : `OS ${o.b}  ·  Prior. ${o.p}  ·  ${o.hh} h`, x+4.5, y+3+lines.length*lh-0.2);
           const bx=x+cw-15.5, st=status[o.b];
           doc.setFont("helvetica","bold"); doc.setFontSize(5.5);
           doc.text("E", bx-0.6, y+3.6, {align:"right"}); doc.text("NE", bx+6.9, y+3.6, {align:"right"});

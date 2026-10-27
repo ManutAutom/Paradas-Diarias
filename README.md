@@ -36,6 +36,7 @@ O `dados.js` guarda todas as semanas na lista `SEMANAS`, e o painel mostra um bo
 Para uma semana nova, copie o bloco da última semana para o **fim** da lista e troque:
 - `num`, `label` e `days` (as seis datas, segunda a sábado);
 - `prog`: programadas, uma linha por OS no formato `data|frente|boletim|frota|prioridade|descrição|H.H`;
+- `sist`: preventiva sistemática, no formato `data|setor|frota|modelo|OS` (aparece no cartão da frota, em roxo, no mesmo dia da condicional);
 - `np`: não programadas, no formato `frente|boletim|frota|descrição|H.H|responsável` (descrição com `A-`, `M-` ou `B-` na frente);
 - `npNota`: de quando é a lista de não programadas.
 
