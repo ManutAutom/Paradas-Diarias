@@ -41,6 +41,7 @@ Para uma semana nova, copie o bloco da última semana para o **fim** da lista e 
 - `npNota`: de quando é a lista de não programadas.
 
 Na aba **Não programadas**, as OS de frotas que já vão parar na semana ficam destacadas em laranja, com o dia da parada.
+Ao trocar o `dados.js`, mude também o número `?v=` nas linhas `<script src="dados.js?v=...">` do `index.html`, para o navegador não usar a versão antiga guardada.
 Os status continuam na planilha; não apague as semanas antigas do `dados.js` para manter o histórico.
 
 ## Observações
