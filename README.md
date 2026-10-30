@@ -34,7 +34,7 @@ As abas **Status** e **Historico** são criadas sozinhas na primeira marcação.
 
 O `dados.js` guarda todas as semanas na lista `SEMANAS`, e o painel mostra um botão por semana (número da semana ISO) para consultar o histórico.
 Para uma semana nova, copie o bloco da última semana para o **fim** da lista e troque:
-- `num`, `label` e `days` (as seis datas, segunda a sábado);
+- `num`, `label` e `days` (as datas da semana; pode ter 6 ou 7 dias, se houver programação no domingo);
 - `prog`: programadas, uma linha por OS no formato `data|frente|boletim|frota|prioridade|descrição|H.H`;
 - `sist`: preventiva sistemática, no formato `data|setor|frota|modelo|OS` (aparece no cartão da frota, em roxo, no mesmo dia da condicional);
 - `np`: não programadas, no formato `frente|boletim|frota|descrição|H.H|responsável` (descrição com `A-`, `M-` ou `B-` na frente);

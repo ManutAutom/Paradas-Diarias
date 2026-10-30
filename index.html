@@ -12,23 +12,35 @@
   --cle:#E8A900; --cle-soft:#FFF4D1; --qz:#1F4E9A; --qz-soft:#E3ECFA;
   --ok:#1E8A4C; --ok-soft:#DDF3E6; --nok:#C2362B; --nok-soft:#FBE3E0; --late:#C46A00; --late-soft:#FDEBD6;
   --today:#16202E;
-  --hit:#C2410C; --hit-soft:#FFEADB; --sis:#6B4FBB; --sis-soft:#EFEAFB;
+  --hit:#C2410C; --hit-soft:#FFEADB; --cle-line:#9A6B00; --qz-line:#0F2E66; --sis:#6B4FBB; --sis-soft:#EFEAFB;
   --f-display:'Nexa','Red Hat Display',system-ui,sans-serif;
   --f-body:'Nexa','Red Hat Text',system-ui,sans-serif;
   --f-mono:'Red Hat Mono',ui-monospace,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --hit:#FB8A4E; --hit-soft:#3A2216; --sis:#A68CF2; --sis-soft:#2A2340;
+  --hit:#FB8A4E; --hit-soft:#3A2216; --cle-line:#FFE08A; --qz-line:#B9D0FF; --sis:#A68CF2; --sis-soft:#2A2340;
   --bg:#0F151E; --panel:#18212D; --ink:#E8EDF4; --muted:#93A0B3; --line:#2A3646;
   --cle:#F5BE2A; --cle-soft:#3A3013; --qz:#6E9BE6; --qz-soft:#1A2A45;
   --ok:#47C27A; --ok-soft:#173527; --nok:#EF6B60; --nok-soft:#3D1D1A; --late:#F0A04B; --late-soft:#3B2914; --today:#E8EDF4; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --hit:#FB8A4E; --hit-soft:#3A2216; --sis:#A68CF2; --sis-soft:#2A2340;
+  --hit:#FB8A4E; --hit-soft:#3A2216; --cle-line:#FFE08A; --qz-line:#B9D0FF; --sis:#A68CF2; --sis-soft:#2A2340;
   --bg:#0F151E; --panel:#18212D; --ink:#E8EDF4; --muted:#93A0B3; --line:#2A3646;
   --cle:#F5BE2A; --cle-soft:#3A3013; --qz:#6E9BE6; --qz-soft:#1A2A45;
   --ok:#47C27A; --ok-soft:#173527; --nok:#EF6B60; --nok-soft:#3D1D1A; --late:#F0A04B; --late-soft:#3B2914; --today:#E8EDF4; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+.btn.ghost{background:var(--panel);color:var(--ink);border-color:var(--line)}
+.btn.ghost[aria-expanded="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.evo{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px}
+.evo-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px 16px}
+.evo h2{font:900 18px var(--f-display);margin:0}
+.evo .sub{font-size:12px;color:var(--muted)}
+.evo-chart{overflow-x:auto}
+.evo-chart svg{display:block;width:100%;min-width:560px;height:auto;max-height:360px}
+.evo-leg{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--muted);align-items:center}
+.evo-leg i{display:inline-block;vertical-align:middle;margin-right:6px}
+.evo-leg .lb{width:12px;height:12px;border-radius:2px}
+.evo-leg .ll{width:20px;height:0;border-top:3px solid;position:relative}
 .os li.sis{background:var(--sis-soft);box-shadow:inset 3px 0 0 var(--sis)}
 .os li.sis .d{font-weight:700;color:var(--sis);letter-spacing:.02em}
 .os li.sis.ex .d{color:var(--muted)}
@@ -71,7 +83,7 @@ h1{font-family:var(--f-display);font-weight:900;font-size:clamp(22px,3vw,34px);m
 
 .legend{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12px;color:var(--muted);align-items:center}
 .board-scroll{overflow-x:auto;padding-bottom:6px}
-.board{display:grid;grid-template-columns:repeat(6,minmax(250px,1fr));gap:12px;min-width:1560px}
+.board{display:grid;grid-template-columns:repeat(var(--nd,6),minmax(250px,1fr));gap:12px;min-width:calc(var(--nd,6) * 262px)}
 @media (max-width:820px){.board{grid-template-columns:1fr;min-width:0}.board-scroll{overflow:visible}}
 .day{background:var(--panel);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;min-width:0}
 .day.is-today{border:2px solid var(--today)}
@@ -159,10 +171,22 @@ tr.hit td:first-child{box-shadow:inset 5px 0 0 var(--hit)}
         <button id="u-qz" data-u="qz" aria-pressed="false">Queiroz</button>
       </div>
       <label class="nome"><span>Seu nome</span><input id="nome" maxlength="40" placeholder="Para registrar quem marcou" autocomplete="name"></label>
+      <button class="btn ghost" id="evo-btn" aria-expanded="false" aria-controls="evo">Evolução semanal</button>
       <button class="btn" id="pdf-btn">Exportar PDF</button>
       <span class="sync"><span class="dot" id="dot"></span><span id="synctxt">Conectando…</span></span>
     </div>
   </header>
+
+  <section class="evo" id="evo" hidden>
+    <div class="evo-h"><h2>Evolução das preventivas condicionais programadas</h2><span class="sub">Por semana e unidade · só condicionais, sem sistemáticas</span></div>
+    <div class="evo-leg">
+      <span><i class="lb" style="background:var(--cle)"></i>OS Clementina</span>
+      <span><i class="lb" style="background:var(--qz)"></i>OS Queiroz</span>
+      <span><i class="ll" style="border-color:var(--cle-line)"></i>H.H Clementina</span>
+      <span><i class="ll" style="border-color:var(--qz-line)"></i>H.H Queiroz</span>
+    </div>
+    <div class="evo-chart" id="evo-chart"></div>
+  </section>
 
   <nav class="wk" id="weeks" aria-label="Semana"></nav>
 
@@ -192,8 +216,8 @@ tr.hit td:first-child{box-shadow:inset 5px 0 0 var(--hit)}
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="config.js?v=20261027b"></script>
-<script src="dados.js?v=20261027b"></script>
+<script src="config.js?v=20261030b"></script>
+<script src="dados.js?v=20261030b"></script>
 <script>
 const RESP = {cle:"DENER", qz:"MARCIO"};
 const UNOME = {cle:"Clementina", qz:"Queiroz"};
@@ -224,7 +248,7 @@ function loadWeek(w){
   document.getElementById("titulo").textContent = `Cronograma de Parada · Semana ${w.num} · ${w.label}`;
   document.title = `Painel de Parada · Semana ${w.num}`;
 }
-const WD = ["Dom","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const WD = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
 const status = {};           // boletim -> "ex" | "nx"
 const meta = {};             // boletim -> {by, at}
 const pending = new Set();
@@ -318,6 +342,7 @@ function renderProg(){
     </div></div>`;
 
   const tk = todayKey();
+  document.getElementById("board").style.setProperty("--nd", DAYS.length);
   document.getElementById("board").innerHTML = DAYS.map(d=>{
     const dl = list.filter(o=>o.d===d), s = summary(dl);
     const dsis = SIS.filter(o=>o.d===d && (unit==="all"||o.u===unit));
@@ -379,10 +404,49 @@ document.getElementById("board").addEventListener("click", async e=>{
 });
 function setSync(on,t){ document.getElementById("dot").classList.toggle("on",on); document.getElementById("synctxt").textContent=t; }
 
+/* ---------- Gráfico de evolução (só condicionais) ---------- */
+function renderEvo(){
+  const data = SEMANAS.map(w=>{
+    const r = {num:w.num, label:ddmm(w.days[0])+"–"+ddmm(w.days[w.days.length-1])};
+    for (const u of ["cle","qz"]) { const ls = lines(w.prog[u]); r[u+"N"] = ls.length; r[u+"H"] = ls.reduce((s,l)=>s+(+l.split("|")[6]||0),0); }
+    return r;
+  });
+  const nice = v => { if (v<=0) return 10; const p = Math.pow(10, Math.floor(Math.log10(v))); for (const m of [1,2,2.5,5,10]) if (m*p >= v) return m*p; return 10*p; };
+  const VW = Math.max(560, document.getElementById("evo-chart").clientWidth || 900), VH = 320, L = 56, R = 60, T = 28, B = 52, PW = VW-L-R, PH = VH-T-B;
+  const maxN = nice(Math.max(...data.map(d=>Math.max(d.cleN,d.qzN)))*1.15), maxH = nice(Math.max(...data.map(d=>Math.max(d.cleH,d.qzH)))*1.15);
+  const gw = PW/data.length, bw = Math.min(34, gw*0.26);
+  const yN = v => T + PH - v/maxN*PH, yH = v => T + PH - v/maxH*PH, cx = i => L + gw*i + gw/2;
+  let g = "";
+  for (let k=0;k<=4;k++){ const yy = T + PH*k/4;
+    g += `<line x1="${L}" x2="${L+PW}" y1="${yy}" y2="${yy}" stroke="var(--line)" stroke-width="1"/>`;
+    g += `<text x="${L-8}" y="${yy+4}" text-anchor="end" font-size="11" fill="var(--muted)">${Math.round(maxN*(4-k)/4)}</text>`;
+    g += `<text x="${L+PW+8}" y="${yy+4}" font-size="11" fill="var(--muted)">${Math.round(maxH*(4-k)/4)}</text>`; }
+  g += `<text x="${L-8}" y="${T-12}" text-anchor="end" font-size="11" font-weight="700" fill="var(--muted)">OS</text><text x="${L+PW+8}" y="${T-12}" font-size="11" font-weight="700" fill="var(--muted)">H.H</text>`;
+  data.forEach((d,i)=>{
+    [["cle",-1],["qz",1]].forEach(([u,sg])=>{ const n=d[u+"N"], x = cx(i) + (sg<0 ? -bw-3 : 3), y = yN(n);
+      g += `<rect x="${x}" y="${y}" width="${bw}" height="${T+PH-y}" rx="3" fill="var(--${u})"><title>Semana ${d.num} · ${UNOME[u]}: ${n} OS</title></rect>`;
+      g += `<text x="${x+bw/2}" y="${T+PH-6}" text-anchor="middle" font-size="11" font-weight="700" fill="${u==='qz'?'#fff':'#16202E'}">${n||''}</text>`; });
+    g += `<text x="${cx(i)}" y="${T+PH+20}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)">Sem ${d.num}</text>`;
+    g += `<text x="${cx(i)}" y="${T+PH+36}" text-anchor="middle" font-size="11" fill="var(--muted)">${d.label}</text>`;
+  });
+  for (const u of ["cle","qz"]) {
+    const pts = data.map((d,i)=>[cx(i), yH(d[u+"H"]), d[u+"H"]]);
+    g += `<polyline points="${pts.map(p=>p[0]+","+p[1]).join(" ")}" fill="none" stroke="var(--${u}-line)" stroke-width="2.5" stroke-linejoin="round"/>`;
+    pts.forEach(([x,y,v],i)=>{ g += `<circle cx="${x}" cy="${y}" r="4.5" fill="var(--panel)" stroke="var(--${u}-line)" stroke-width="2.5"><title>Semana ${data[i].num} · ${UNOME[u]}: ${v} H.H</title></circle>`;
+      g += `<text x="${x}" y="${y-10}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--${u}-line)" paint-order="stroke" stroke="var(--panel)" stroke-width="3">${v} h</text>`; });
+  }
+  document.getElementById("evo-chart").innerHTML = `<svg viewBox="0 0 ${VW} ${VH}" role="img" aria-label="OS e H.H condicionais programadas por semana e unidade" font-family="inherit">${g}</svg>`;
+}
+document.getElementById("evo-btn").addEventListener("click", e=>{
+  const b = e.currentTarget, open = b.getAttribute("aria-expanded")!=="true";
+  b.setAttribute("aria-expanded", open); document.getElementById("evo").hidden = !open;
+  if (open) renderEvo();
+});
+
 /* ---------- Exportar PDF (A3 paisagem, uma folha por unidade) ---------- */
 const PU = {cle:{name:"CLEMENTINA",col:[242,182,0],soft:[255,244,209],fg:[0,0,0]},
             qz:{name:"QUEIROZ",col:[31,78,154],soft:[227,236,250],fg:[255,255,255]}};
-const WDP = ["SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"];
+const WDP = ["DOMINGO","SEGUNDA","TERÇA","QUARTA","QUINTA","SEXTA","SÁBADO"];
 function buildPDF(units){
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF({orientation:"landscape",unit:"mm",format:"a3"});
@@ -398,13 +462,13 @@ function buildPDF(units){
     doc.text(`Semana ${W.num} · ${SEMANA}  ·  Responsável: ${RESP[u]}  ·  ${s.n} OS  ·  ${s.hh} H.H  ·  ${s.frotas} frotas  ·  Executadas: ${s.ex} OS / ${s.exhh} H.H (${pct(s.exhh,s.hh)}%)  ·  Sistemáticas: ${sEx}/${srows.length}`, M, 23);
     doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.text("CLEALCO · MANUTENÇÃO AUTOMOTIVA", W-M, 15, {align:"right"});
     doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.text("E = executada   NE = não executada   (marcado = status no painel em "+gerado+")", W-M, 23, {align:"right"});
-    const top=34, bottom=H-31, cw=(W-2*M-5*G)/6;
+    const top=34, bottom=H-31, nd=DAYS.length, cw=(W-2*M-(nd-1)*G)/nd;
     DAYS.forEach((d,i)=>{
       const x=M+i*(cw+G), dl=rows.filter(o=>o.d===d), ds=summary(dl), dsl=srows.filter(o=>o.d===d);
       doc.setDrawColor(...LN); doc.setLineWidth(.3); doc.roundedRect(x,top,cw,bottom-top,2,2,"S");
       doc.setFillColor(...INK); doc.roundedRect(x,top,cw,14,2,2,"F"); doc.rect(x,top+10,cw,4,"F");
       doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(16); doc.text(`${d.slice(8)}/${d.slice(5,7)}`, x+3, top+8);
-      doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.text(WDP[i], x+3, top+12);
+      doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.text(WDP[new Date(d+"T12:00:00").getDay()], x+3, top+12);
       doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.text(`${ds.n} OS · ${ds.hh} H.H${dsl.length?' · '+dsl.length+' sist.':''}`, x+cw-3, top+7.5, {align:"right"});
       doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.text(`Exec.: ${ds.ex} / ${ds.n}`, x+cw-3, top+12, {align:"right"});
       let y=top+17;
